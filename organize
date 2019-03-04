@@ -1,11 +1,44 @@
 #!/bin/bash
 
 directory="Executables"
-prog=(c py java cpp js mat sh go pl)
-vids=(mp4 mpeg mkv flv avi)
-imgs=(jpeg jpg png)
-docs=(pdf txt doc pptx md xls)
-comp=(zip tar deb rar tgz xz gz)
+
+declare -A extensions
+
+extensions=( ["c"]="1" 
+			 ["py"]="1"
+			 ["cpp"]="1"
+			 ["java"]="1"
+			 ["js"]="1"
+			 ["mat"]="1"
+			 ["sh"]="1"
+			 ["go"]="1"
+
+			 ["mp4"]="2" 
+			 ["mpeg"]="2"
+			 ["mkv"]="2"
+			 ["flv"]="2"
+			 ["avi"]="2"
+
+			 ["img"]="3"
+			 ["jpeg"]="3"
+			 ["png"]="3"
+			 ["gif"]="3" 
+
+			 ["pdf"]="4"
+			 ["txt"]="4"
+			 ["doc"]="4"
+			 ["pptx"]="4"
+			 ["xls"]="4"
+			 ["md"]="4"
+
+			 ["zip"]="5"
+			 ["tar"]="5" 
+			 ["deb"]="5"
+			 ["rar"]="5"
+			 ["tgz"]="5"
+			 ["xz"]="5"
+			 ["gz"]="5"
+				)
 
 create_dir () {
 
@@ -16,6 +49,7 @@ create_dir () {
 		echo "Directory exists"
 	else
 		mkdir $directory
+		echo "Directory Created"
 	fi
 
 }
@@ -26,37 +60,9 @@ get_cat () {
 	
 	local val=0
 
-	for items in "${prog[@]}"; do
-        if [[ $items == $ext ]]; then
-            val=1
-			return $val
-        fi
-    done
-
-	for items in "${vids[@]}"; do
-        if [[ $items == $ext ]]; then
-            val=2
-			return $val
-        fi
-    done
-
-	for items in "${imgs[@]}"; do
-        if [[ $items == $ext ]]; then
-            val=3
-			return $val
-        fi
-    done
-	
-	for items in "${docs[@]}"; do
-        if [[ $items == $ext ]]; then
-            val=4
-			return $val
-        fi
-    done
-
-	for items in "${comp[@]}"; do
-        if [[ $items == $ext ]]; then
-            val=5
+	for key in "${!extensions[@]}"; do
+        if [[ $key == $ext ]]; then
+			val=${extensions[$key]}
 			return $val
         fi
     done
@@ -67,15 +73,18 @@ get_cat () {
 
 organize_dir (){
 	local file="$1"
-	local filename=$(basename "$file")
-	local ext=${filename##*.}
+	local filename=$(basename "$file") #get the filename from address
+	local ext=${filename##*.}  #get the extension from filename
+
+	local ext="${ext,,}" #convert the extension to lowercase
 	
 	if [[ ! "$ext" == '' && ! -d "$filename" ]]
 	then
 		get_cat "$ext"
 		local val=$?
+		echo $val
 	
-	if [[ "$val" == 1 ]]
+	if [[ "$val" == "1" ]]
 	then
 		dirname="Programming"
 		if [[ ! -d "$dirname" ]]
@@ -83,7 +92,7 @@ organize_dir (){
 			create_dir $dirname 
 		fi
 		mv "$filename" $dirname 
-	elif [[ "$val" == 2 ]]
+	elif [[ "$val" == "2" ]]
 	then
 		dirname="Videos"
 		if [[ ! -d "$dirname" ]]
@@ -91,7 +100,7 @@ organize_dir (){
 			create_dir $dirname 
 		fi
 		mv "$filename" $dirname 
-	elif [[ "$val" == 3 ]]
+	elif [[ "$val" == "3" ]]
 	then
 		dirname="Images"
 		if [[ ! -d "$dirname" ]]
@@ -99,7 +108,7 @@ organize_dir (){
 			create_dir $dirname 
 		fi
 		mv "$filename" $dirname 
-	elif [[ "$val" == 4 ]]
+	elif [[ "$val" == "4" ]]
 	then
 		dirname="Documents"
 		if [[ ! -d "$dirname" ]]
@@ -107,7 +116,7 @@ organize_dir (){
 			create_dir $dirname 
 		fi
 		mv "$filename" $dirname 
-	elif [[ "$val" == 5 ]]
+	elif [[ "$val" == "5" ]]
 	then
 		dirname="Compressed"
 		if [[ ! -d "$dirname" ]]
@@ -115,7 +124,7 @@ organize_dir (){
 			create_dir $dirname 
 		fi
 		mv "$filename" $dirname 
-	elif [[ "$val" == 0 ]]
+	elif [[ "$val" == "0" ]]
 	then
 		dirname="Others"
 		if [[ ! -d "$dirname" ]]
