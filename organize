@@ -1,0 +1,148 @@
+#!/bin/bash
+
+directory="Executables"
+prog=(c py java cpp js mat sh go pl)
+vids=(mp4 mpeg mkv flv avi)
+imgs=(jpeg jpg png)
+docs=(pdf txt doc pptx md xls)
+comp=(zip tar deb rar tgz xz gz)
+
+create_dir () {
+
+	local directory=$1
+
+	if [[ -e "$directory" ]]
+	then
+		echo "Directory exists"
+	else
+		mkdir $directory
+	fi
+
+}
+
+get_cat () {
+
+	local ext=$1
+	
+	local val=0
+
+	for items in "${prog[@]}"; do
+        if [[ $items == $ext ]]; then
+            val=1
+			return $val
+        fi
+    done
+
+	for items in "${vids[@]}"; do
+        if [[ $items == $ext ]]; then
+            val=2
+			return $val
+        fi
+    done
+
+	for items in "${imgs[@]}"; do
+        if [[ $items == $ext ]]; then
+            val=3
+			return $val
+        fi
+    done
+	
+	for items in "${docs[@]}"; do
+        if [[ $items == $ext ]]; then
+            val=4
+			return $val
+        fi
+    done
+
+	for items in "${comp[@]}"; do
+        if [[ $items == $ext ]]; then
+            val=5
+			return $val
+        fi
+    done
+		
+	return $val
+}
+
+
+organize_dir (){
+	local file="$1"
+	local filename=$(basename "$file")
+	local ext=${filename##*.}
+	
+	if [[ ! "$ext" == '' && ! -d "$filename" ]]
+	then
+		get_cat "$ext"
+		local val=$?
+	
+	if [[ "$val" == 1 ]]
+	then
+		dirname="Programming"
+		if [[ ! -d "$dirname" ]]
+		then
+			create_dir $dirname 
+		fi
+		mv "$filename" $dirname 
+	elif [[ "$val" == 2 ]]
+	then
+		dirname="Videos"
+		if [[ ! -d "$dirname" ]]
+		then
+			create_dir $dirname 
+		fi
+		mv "$filename" $dirname 
+	elif [[ "$val" == 3 ]]
+	then
+		dirname="Images"
+		if [[ ! -d "$dirname" ]]
+		then
+			create_dir $dirname 
+		fi
+		mv "$filename" $dirname 
+	elif [[ "$val" == 4 ]]
+	then
+		dirname="Documents"
+		if [[ ! -d "$dirname" ]]
+		then
+			create_dir $dirname 
+		fi
+		mv "$filename" $dirname 
+	elif [[ "$val" == 5 ]]
+	then
+		dirname="Compressed"
+		if [[ ! -d "$dirname" ]]
+		then
+			create_dir $dirname 
+		fi
+		mv "$filename" $dirname 
+	elif [[ "$val" == 0 ]]
+	then
+		dirname="Others"
+		if [[ ! -d "$dirname" ]]
+		then
+			create_dir $dirname 
+		fi
+		mv "$filename" $dirname 
+	fi
+
+	fi
+}
+
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
+
+for file in $(ls | grep -v $(basename "$0"))
+do
+
+if [[ -x "$file" && ! -d "$file" && $(grep -r1 '#!/bin/bash' "$file") ]]
+then
+	echo "in exec"
+	create_dir $directory
+	mv "$file" $directory
+else
+	organize_dir "$file"
+fi
+
+done
+
+IFS=$SAVEIFS
